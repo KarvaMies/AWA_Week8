@@ -84,5 +84,17 @@ router.post("/user/login", (req, res, next) => {
   })(req, res, next)
 });
 
+router.get("/secret", checkAuthenticated, (req, res) => {
+  res.status(200).json({ message: "You are logged in so you can see this message" });
+})
+
+function checkAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) {
+    console.log("authenticated, yes")
+    return next()
+  }
+  console.log("not authenticated")
+  return res.status(401).json({ message: "Please log in to see this page" });
+}
 
 module.exports = router;
