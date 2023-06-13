@@ -70,12 +70,6 @@ router.get("/user/list", (req, res) => {
   res.json(users);
 })
 
-router.post("/user/login", passport.authenticate('local', {
-  successRedirect: "/",
-  failureRedirect: "/api",
-}))
-
-
 router.post("/user/login", (req, res, next) => {
   console.log("Trying to login");
   passport.authenticate('local', (err, user) => {
