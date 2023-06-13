@@ -33,7 +33,7 @@ router.get('/', function(req, res, next) {
   res.send('respond with a resource');
 });
 
-router.post("/user/register", (req, res) => {
+router.post("/user/register", checkNotAuthenticated, (req, res) => {
   console.log("Trying to add new user");
   const { username, password } = req.body;
 
@@ -70,7 +70,7 @@ router.get("/user/list", (req, res) => {
   res.json(users);
 })
 
-router.post("/user/login", (req, res, next) => {
+router.post("/user/login", checkNotAuthenticated, (req, res, next) => {
   console.log("Trying to login");
   passport.authenticate('local', (err, user) => {
     if (err) throw err;
@@ -88,13 +88,18 @@ router.get("/secret", checkAuthenticated, (req, res) => {
   res.status(200).json({ message: "You are logged in so you can see this message" });
 })
 
-function checkAuthenticated(req, res, next) {
+function checkAuthenticated (req, res, next) {
   if (req.isAuthenticated()) {
-    console.log("authenticated, yes")
     return next()
   }
-  console.log("not authenticated")
   return res.status(401).json({ message: "Please log in to see this page" });
+}
+
+function checkNotAuthenticated (req, res, next) {
+  if (req.isAuthenticated()) {
+    return res.redirect("/api")
+  }
+  return next()
 }
 
 module.exports = router;
