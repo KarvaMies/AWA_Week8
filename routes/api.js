@@ -2,12 +2,32 @@ require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
-const jwt = require("jsonwebtoken");
+const passport = require('passport');
+const session = require('express-session')
+
+function getUserByUsername(username) {
+  return users.find(user => user.username === username)
+}
+
+function getUserById(id) {
+  return users.find(user => user.id === id)
+}
+
+const initializePassport = require('../passport-config');
+initializePassport(passport, getUserByUsername, getUserById);
 
 router.use(express.json());
 
 let users = [];
 
+router.use(session({
+  secret: "GFHTJK#dfht256774g",
+  resave: false,
+  saveUninitialized: false
+}))
+
+router.use(passport.initialize())
+router.use(passport.session())
 
 router.get('/', function(req, res, next) {
   res.send('respond with a resource');
@@ -50,6 +70,12 @@ router.get("/user/list", (req, res) => {
   res.json(users);
 })
 
+router.post("/user/login", passport.authenticate('local', {
+  successRedirect: "/",
+  failureRedirect: "/api"
+}))
+
+/*
 router.post("/user/login", (req, res) => {
   console.log("Trying to login");
   const { username, password } = req.body;
@@ -78,5 +104,6 @@ router.post("/user/login", (req, res) => {
     );
   })
 });
+*/
 
 module.exports = router;
