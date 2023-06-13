@@ -72,38 +72,23 @@ router.get("/user/list", (req, res) => {
 
 router.post("/user/login", passport.authenticate('local', {
   successRedirect: "/",
-  failureRedirect: "/api"
+  failureRedirect: "/api",
 }))
 
-/*
-router.post("/user/login", (req, res) => {
-  console.log("Trying to login");
-  const { username, password } = req.body;
 
-  const user = users.find((user) => user.username === username);
-  if (!user) {
-    return res.status(401).json({ message: "Invalid username and/or password "});
-  }
-  bcrypt.compare(password, user.password, (err, isMatch) => {
+router.post("/user/login", (req, res, next) => {
+  console.log("Trying to login");
+  passport.authenticate('local', (err, user) => {
     if (err) throw err;
-    if (!isMatch) {
+    if (!user) {
       return res.status(401).json({ message: "Invalid username and/or password "});
     }
-    const jwtPayload = {
-      id: user.id,
-      username: user.username
-    }
-    jwt.sign(jwtPayload, process.env.SECRET,
-      {
-        expiresIn: 120
-      },
-      (err, token) => {
-
-        res.status(200).send("ok")
-      }
-    );
-  })
+    req.logIn(user, (err) => {
+      if (err) throw err;
+      return res.status(200).send("ok")
+    })
+  })(req, res, next)
 });
-*/
+
 
 module.exports = router;
