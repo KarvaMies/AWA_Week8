@@ -1,6 +1,8 @@
+require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
+const jwt = require("jsonwebtoken");
 
 router.use(express.json());
 
@@ -47,5 +49,34 @@ router.get("/user/list", (req, res) => {
   console.log(users);
   res.json(users);
 })
+
+router.post("/user/login", (req, res) => {
+  console.log("Trying to login");
+  const { username, password } = req.body;
+
+  const user = users.find((user) => user.username === username);
+  if (!user) {
+    return res.status(401).json({ message: "Invalid username and/or password "});
+  }
+  bcrypt.compare(password, user.password, (err, isMatch) => {
+    if (err) throw err;
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid username and/or password "});
+    }
+    const jwtPayload = {
+      id: user.id,
+      username: user.username
+    }
+    jwt.sign(jwtPayload, process.env.SECRET,
+      {
+        expiresIn: 120
+      },
+      (err, token) => {
+
+        res.status(200).send("ok")
+      }
+    );
+  })
+});
 
 module.exports = router;
